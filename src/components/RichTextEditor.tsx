@@ -9,8 +9,8 @@ type State = {
 };
 type Action =
     | { type: "insert", value: string }
-    | { type: "backspace" }
-    | { type: "delete" }
+    | { type: "backspace", word: boolean }
+    | { type: "delete", word: boolean }
     | { type: "newline" }
     | { type: "home", ofText: boolean }
     | { type: "end", ofText: boolean }
@@ -50,15 +50,25 @@ function reducer(state: State, action: Action): State {
                 cursorPosition: getCursotPosition(absoluteCursorPosition + textToInsert.length, newText),
             };
         }
-        case "backspace": return absoluteCursorPosition === 0 ? state : {
-            ...state,
-            text: text.slice(0, absoluteCursorPosition - 1) + text.slice(absoluteCursorPosition),
-            cursorPosition: getCursotPosition(absoluteCursorPosition - 1, text),
-        };
-        case "delete": return absoluteCursorPosition === text.length ? state : {
-            ...state,
-            text: text.slice(0, absoluteCursorPosition) + text.slice(absoluteCursorPosition + 1),
-        };
+        case "backspace": {
+            const textToSearch = text.slice(0, absoluteCursorPosition).split("").reverse().join("");
+            const lengthToDelete = action.word ? textToSearch.match(/\s{2,}| ?\w+| ?\W+|/)?.[0].length ?? 0 : 1;
+
+            return absoluteCursorPosition === 0 ? state : {
+                ...state,
+                text: text.slice(0, absoluteCursorPosition - lengthToDelete) + text.slice(absoluteCursorPosition),
+                cursorPosition: getCursotPosition(absoluteCursorPosition - lengthToDelete, text),
+            };
+        }
+        case "delete": {
+            const textToSearch = text.slice(absoluteCursorPosition);
+            const lengthToDelete = action.word ? textToSearch.match(/\s{2,}| ?\w+| ?\W+|/)?.[0].length ?? 0 : 1;
+
+            return absoluteCursorPosition === text.length ? state : {
+                ...state,
+                text: text.slice(0, absoluteCursorPosition) + text.slice(absoluteCursorPosition + lengthToDelete),
+            };
+        }
         case "newline": return {
             ...state,
             text: text.slice(0, absoluteCursorPosition) + "\n" + text.slice(absoluteCursorPosition),
@@ -121,15 +131,7 @@ export function RichTextEditor() {
     });
 
     function handleKeyDown(e: KeyboardEvent<HTMLDivElement>) {
-        // TODO:
-        //  * Support ctrl + stuff
-        //  * Support shift
-        //  * Support mouse cursor control
-        //  * Support text highlighting
-        //  * Support switching writing direction (ctrl + shift)
-        console.log(e.code);
-
-        if (e.key === "v" && e.ctrlKey) {
+        if (["v", "c"].includes(e.key) && e.ctrlKey) {
             return;
         }
 
@@ -160,12 +162,12 @@ export function RichTextEditor() {
 
         if (e.key === "Backspace") {
             e.preventDefault();
-            dispatch({ type: "backspace" });
+            dispatch({ type: "backspace", word: e.ctrlKey });
         }
 
         if (e.key === "Delete") {
             e.preventDefault();
-            dispatch({ type: "delete" });
+            dispatch({ type: "delete", word: e.ctrlKey });
         }
 
         if (e.key === "ArrowLeft") {
@@ -200,7 +202,12 @@ export function RichTextEditor() {
     }
 
     return (
-        <div data-rtl={rtl} className={styles.container} tabIndex={0} onKeyDown={handleKeyDown} onPaste={(e) => dispatch({ type: "insert", value: e.clipboardData.getData("text") })}>
+        <div
+            data-rtl={rtl}
+            className={styles.container}
+            tabIndex={0}
+            onKeyDown={handleKeyDown}
+            onPaste={(e) => dispatch({ type: "insert", value: e.clipboardData.getData("text") })}>
             {state.text.slice(0, absoluteCursorPosition)}<span className={styles.cursor} ref={cursorRef}>|</span>{state.text.slice(absoluteCursorPosition)}
         </div>
     );
