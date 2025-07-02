@@ -1,19 +1,28 @@
 .container {
-    height: 10ex;
+    height: 70ex;
     border: 1px solid lightgray;
     border-radius: 8px;
     resize: none;
-    padding: 0.5em 0.8em;
+    padding: 0.5em 0.8em 10em 0.8em;
     overflow: auto;
     white-space: pre;
     position: relative;
+    font-family: monospace;
 
-    &:focus-visible {
+    &:focus {
         outline: 1px solid var(--color-primary-500);
+
+        .cursor {
+            display: inline;
+        }
     }
 
-    &:focus .cursor {
-        display: inline;
+    &[data-rtl="true"] {
+        direction: rtl;
+
+        .cursor {
+            direction: rtl;
+        }
     }
 }
 
@@ -23,12 +32,14 @@
     position: absolute;
     margin-inline-start: -0.15em;
     margin-block-start: -0.1em;
+    scroll-margin: 1em 0.8em;
 }
 
 @keyframes blink {
     from {
         opacity: 0;
     }
+
     to {
         opacity: 1;
     }
