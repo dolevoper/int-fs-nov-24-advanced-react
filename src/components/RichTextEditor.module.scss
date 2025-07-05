@@ -8,6 +8,7 @@
     white-space: pre;
     position: relative;
     font-family: monospace;
+    cursor: text;
 
     &:focus {
         outline: 1px solid var(--color-primary-500);

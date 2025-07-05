@@ -14,7 +14,7 @@ type Action =
     | { type: "newline" }
     | { type: "home", ofText: boolean }
     | { type: "end", ofText: boolean }
-    | { type: "move cursor horizontal", by: number }
+    | { type: "move cursor horizontal", direction: "forward" | "backward", word: boolean }
     | { type: "move cursor vertical", by: number };
 
 const clamp = (min: number, num: number, max: number) => Math.max(min, Math.min(max, num));
@@ -77,10 +77,16 @@ function reducer(state: State, action: Action): State {
                 y: cursorPosition.y + 1,
             },
         };
-        case "move cursor horizontal": return {
-            ...state,
-            cursorPosition: getCursotPosition(clamp(0, absoluteCursorPosition + action.by, text.length), text),
-        };
+        case "move cursor horizontal": {
+            const textToSearch = action.direction === "forward" ? text.slice(absoluteCursorPosition) : text.slice(0, absoluteCursorPosition).split("").reverse().join("");
+            const lengthToMove = action.word ? textToSearch.match(/\s{2,}| ?\w+| ?\W+|/)?.[0].length ?? 0 : 1;
+            const by = (action.direction === "forward" ? 1 : -1) * lengthToMove;
+
+            return {
+                ...state,
+                cursorPosition: getCursotPosition(clamp(0, absoluteCursorPosition + by, text.length), text),
+            };
+        }
         case "move cursor vertical": return {
             ...state,
             cursorPosition: {
@@ -172,12 +178,12 @@ export function RichTextEditor() {
 
         if (e.key === "ArrowLeft") {
             e.preventDefault();
-            dispatch({ type: "move cursor horizontal", by: rtl ? 1 : -1 });
+            dispatch({ type: "move cursor horizontal", direction: rtl ? "forward" : "backward", word: e.ctrlKey });
         }
 
         if (e.key === "ArrowRight") {
             e.preventDefault();
-            dispatch({ type: "move cursor horizontal", by: rtl ? -1 : 1 });
+            dispatch({ type: "move cursor horizontal", direction: rtl ? "backward" : "forward", word: e.ctrlKey });
         }
 
         if (e.key === "ArrowUp") {
