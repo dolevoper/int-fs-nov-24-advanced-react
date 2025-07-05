@@ -137,73 +137,63 @@ export function RichTextEditor() {
     });
 
     function handleKeyDown(e: KeyboardEvent<HTMLDivElement>) {
-        if (["v", "c"].includes(e.key) && e.ctrlKey) {
+        if (e.key.length === 1 && e.ctrlKey) {
             return;
         }
 
-        if (e.ctrlKey && e.code === "ShiftRight") {
+        if (e.ctrlKey && e.key === "Shift") {
             e.preventDefault();
-            setRtl(true);
-        }
-
-        if (e.ctrlKey && e.code === "ShiftLeft") {
-            e.preventDefault();
-            setRtl(false);
+            setRtl(e.code === "ShiftRight");
+            return;
         }
 
         if (e.key.length === 1) {
             e.preventDefault();
             dispatch({ type: "insert", value: e.key });
+            return;
         }
 
-        if (e.key === "Enter") {
-            e.preventDefault();
-            dispatch({ type: "newline" });
-        }
-
-        if (e.key === "Tab") {
-            e.preventDefault();
-            dispatch({ type: "insert", value: "\t" });
-        }
-
-        if (e.key === "Backspace") {
-            e.preventDefault();
-            dispatch({ type: "backspace", word: e.ctrlKey });
-        }
-
-        if (e.key === "Delete") {
-            e.preventDefault();
-            dispatch({ type: "delete", word: e.ctrlKey });
-        }
-
-        if (e.key === "ArrowLeft") {
-            e.preventDefault();
-            dispatch({ type: "move cursor horizontal", direction: rtl ? "forward" : "backward", word: e.ctrlKey });
-        }
-
-        if (e.key === "ArrowRight") {
-            e.preventDefault();
-            dispatch({ type: "move cursor horizontal", direction: rtl ? "backward" : "forward", word: e.ctrlKey });
-        }
-
-        if (e.key === "ArrowUp") {
-            e.preventDefault();
-            dispatch({ type: "move cursor vertical", by: -1 });
-        }
-
-        if (e.key === "ArrowDown") {
-            e.preventDefault();
-            dispatch({ type: "move cursor vertical", by: 1 });
-        }
-
-        if (e.key === "Home") {
-            e.preventDefault();
-            dispatch({ type: "home", ofText: e.ctrlKey });
-        }
-
-        if (e.key === "End") {
-            e.preventDefault();
-            dispatch({ type: "end", ofText: e.ctrlKey });
+        switch (e.key) {
+            case "Enter":
+                e.preventDefault();
+                dispatch({ type: "newline" });
+                break;
+            case "Tab":
+                e.preventDefault();
+                dispatch({ type: "insert", value: "\t" });
+                break;
+            case "Backspace":
+                e.preventDefault();
+                dispatch({ type: "backspace", word: e.ctrlKey });
+                break;
+            case "Delete":
+                e.preventDefault();
+                dispatch({ type: "delete", word: e.ctrlKey });
+                break;
+            case "ArrowLeft":
+                e.preventDefault();
+                dispatch({ type: "move cursor horizontal", direction: rtl ? "forward" : "backward", word: e.ctrlKey });
+                break;
+            case "ArrowRight":
+                e.preventDefault();
+                dispatch({ type: "move cursor horizontal", direction: rtl ? "backward" : "forward", word: e.ctrlKey });
+                break;
+            case "ArrowUp":
+                e.preventDefault();
+                dispatch({ type: "move cursor vertical", by: -1 });
+                break;
+            case "ArrowDown":
+                e.preventDefault();
+                dispatch({ type: "move cursor vertical", by: 1 });
+                break;
+            case "Home":
+                e.preventDefault();
+                dispatch({ type: "home", ofText: e.ctrlKey });
+                break;
+            case "End":
+                e.preventDefault();
+                dispatch({ type: "end", ofText: e.ctrlKey });
+                break;
         }
     }
 
