@@ -15,7 +15,8 @@ type Action =
     | { type: "home", ofText: boolean }
     | { type: "end", ofText: boolean }
     | { type: "move cursor horizontal", direction: "forward" | "backward", word: boolean }
-    | { type: "move cursor vertical", by: number };
+    | { type: "move cursor vertical", by: number }
+    | { type: "set caret", position: number };
 
 const clamp = (min: number, num: number, max: number) => Math.max(min, Math.min(max, num));
 
@@ -112,6 +113,10 @@ function reducer(state: State, action: Action): State {
                 x: text.split("\n")[cursorPosition.y].length,
             }
         };
+        case "set caret": return {
+            ...state,
+            cursorPosition: getCursotPosition(action.position, text),
+        };
     }
 }
 
@@ -203,7 +208,23 @@ export function RichTextEditor() {
             className={styles.container}
             tabIndex={0}
             onKeyDown={handleKeyDown}
-            onPaste={(e) => dispatch({ type: "insert", value: e.clipboardData.getData("text") })}>
+            onPaste={(e) => dispatch({ type: "insert", value: e.clipboardData.getData("text") })}
+            onMouseDown={(e) => {
+                if (e.clientY + window.scrollY - e.currentTarget.offsetTop > e.currentTarget.clientHeight || e.clientX + window.scrollX - e.currentTarget.offsetLeft > e.currentTarget.clientWidth) {
+                    return;
+                }
+
+                const caretPosition = document.caretPositionFromPoint(e.clientX, e.clientY);
+
+                if (!caretPosition) {
+                    return;
+                }
+
+                const position = caretPosition.offset + (caretPosition.offsetNode.previousSibling ? absoluteCursorPosition : 0);
+
+                dispatch({ type: "set caret", position });
+            }}
+        >
             {state.text.slice(0, absoluteCursorPosition)}<span className={styles.cursor} ref={cursorRef}>|</span>{state.text.slice(absoluteCursorPosition)}
         </div>
     );
