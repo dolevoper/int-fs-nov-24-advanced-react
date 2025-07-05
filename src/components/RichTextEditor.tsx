@@ -216,7 +216,7 @@ export function RichTextEditor() {
 
                 const caretPosition = document.caretPositionFromPoint(e.clientX, e.clientY);
 
-                if (!caretPosition) {
+                if (!caretPosition || cursorRef.current?.contains(caretPosition.offsetNode)) {
                     return;
                 }
 

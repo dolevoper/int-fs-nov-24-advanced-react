@@ -10,7 +10,8 @@
     position: relative;
     font-family: monospace;
     cursor: text;
-
+    user-select: none;
+    
     &:focus {
         outline: 1px solid var(--color-primary-500);
 
