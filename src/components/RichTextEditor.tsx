@@ -216,7 +216,7 @@ export function RichTextEditor() {
 
                 const caretPosition = document.caretPositionFromPoint(e.clientX, e.clientY);
 
-                if (!caretPosition || cursorRef.current?.contains(caretPosition.offsetNode)) {
+                if (!caretPosition) {
                     return;
                 }
 
@@ -225,7 +225,7 @@ export function RichTextEditor() {
                 dispatch({ type: "set caret", position });
             }}
         >
-            {state.text.slice(0, absoluteCursorPosition)}<span className={styles.cursor} ref={cursorRef}>|</span>{state.text.slice(absoluteCursorPosition)}
+            {state.text.slice(0, absoluteCursorPosition)}<span className={styles.cursor} ref={cursorRef} onMouseDown={(e) => e.stopPropagation()}>|</span>{state.text.slice(absoluteCursorPosition)}
         </div>
     );
 }
