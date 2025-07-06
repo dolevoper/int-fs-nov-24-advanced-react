@@ -2,7 +2,6 @@ import { useEffect, useReducer, useRef, useState, type KeyboardEvent } from "rea
 import styles from "./RichTextEditor.module.scss";
 
 type CursorPosition = { x: number, y: number };
-
 type State = {
     text: string,
     cursorPosition: CursorPosition,
@@ -38,7 +37,6 @@ const getCursotPosition = (absolutePosition: number, text: string): CursorPositi
 function reducer(state: State, action: Action): State {
     const { text, cursorPosition } = state;
     const absoluteCursorPosition = getAbsoluteCursorPosition(state);
-
 
     switch (action.type) {
         case "insert": {
